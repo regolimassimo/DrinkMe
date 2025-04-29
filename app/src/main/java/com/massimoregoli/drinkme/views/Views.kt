@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,6 +17,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -36,8 +39,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -48,6 +54,7 @@ import com.massimoregoli.drinkme.model.CocktailViewModelFactory
 import com.massimoregoli.drinkme.model.LargeCocktail
 import com.massimoregoli.drinkme.model.SmallCocktail
 import com.massimoregoli.drinkme.ui.theme.DrinkMeTextStyles
+import androidx.compose.ui.platform.LocalFocusManager
 
 @Composable
 fun CocktailList(
@@ -60,12 +67,22 @@ fun CocktailList(
     val viewModel: CocktailViewModel = viewModel(factory = factory)
     val cocktails by viewModel.cocktails.observeAsState(emptyList())
     val drinks by viewModel.drinks.observeAsState(emptyList())
+
+    val focusManager = LocalFocusManager.current
+
     Column(modifier = modifier.fillMaxWidth()) {
         OutlinedTextField(
-            filter.value, onValueChange = {
+            value = filter.value, onValueChange = {
                 filter.value = it
-
             },
+            keyboardActions = KeyboardActions (onSearch={
+                focusManager.clearFocus()
+                viewModel.loadCocktails(filter.value)
+            }),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Search),
+            maxLines = 1,
             modifier = Modifier
                 .padding(8.dp)
                 .fillMaxWidth(),
@@ -206,7 +223,6 @@ fun DrinkProperty(painterRes: Painter, label: String) {
         )
 
     }
-
 }
 
 @Composable
@@ -254,4 +270,16 @@ fun Title(text: String) {
         text = text,
         style = DrinkMeTextStyles.titleLarge
     )
+}
+
+@Composable
+fun SplashScreen() {
+    Column(modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        Image(painter = painterResource(id = R.drawable.logo),
+            contentDescription = "logo",
+            modifier=Modifier.fillMaxWidth(0.8f),
+            contentScale = ContentScale.FillWidth)
+    }
 }
